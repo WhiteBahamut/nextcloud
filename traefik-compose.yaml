@@ -1,0 +1,34 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker.swarmmode=true"
+      - "--providers.docker.network=traefik_front"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myhttpchallenge.acme.email=admin@your_domain"
+      - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
+    hostname: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    networks:
+      - traefikfront
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /traefik/acme.json:/letsencrypt/acme.json
+    deploy:
+      mode: replicated
+      replicas: 1
+
+networks:
+  traefikfront:
+    driver: overlay
