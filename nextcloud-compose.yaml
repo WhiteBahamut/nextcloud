@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:latest
+    volumes:
+      - nextcloud-postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=
+      - POSTGRES_USER=
+    networks:
+      - back
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  redis:
+    image: redis:latest
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - nextcloud-redis:/usr/local/etc/redis/redis.conf
+    networks:
+      - back
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  nextcloud:
+    image: nextcloud:latest
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - nextcloud-apps:/var/www/html/custom_apps
+      - nextcloud-configs:/var/www/html/config
+      - nextcloud-data:/var/www/html/data
+    networks:
+      - traefik_traefikfront
+      - back
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.your_domain`)"
+        - "traefik.http.routers.nextcloud.entrypoints=websecure"
+        - "traefik.http.routers.nextcloud.tls.certresolver=myhttpchallenge"
+        - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+        - "traefik.docker.network=traefik_traefikfront"
+      mode: replicated
+      replicas: 1
+
+networks:
+  traefik_traefikfront:
+    external: true
+  back:
+
+volumes:
+  nextcloud-apps:
+  nextcloud-configs:
+  nextcloud-data:
+  nextcloud-redis:
+  nextcloud-postgres:
