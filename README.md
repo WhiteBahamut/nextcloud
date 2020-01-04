@@ -20,10 +20,11 @@ Setup the commands to start Traefik with.
 First of all enable the docker swarm integration. 
 ```
       - "--providers.docker.swarmmode=true"
-      - "--providers.docker.network=traefik_front"
+      - "--providers.docker.network=traefik_traefikfront"
       - "--providers.docker.exposedbydefault=false"
 ```
-With `--providers.docker.network=traefik_front` you specify to use the network `traefik_front` for the loadbalancing (I had not done this in the first place and traefik was constantly rotating the different docker network IPs of my nextcloud instance). In addition set `--providers.docker.exposedbydefault=false`, so not all services are exposed.
+With `--providers.docker.network=traefik_traefikfront` you specify to use the network `traefik_traefikfront` for the loadbalancing (I had not done this in the first place and traefik was constantly rotating the different docker network IPs of my nextcloud instance). The additional `traefik` in front of the network comes from the stackname Traefik is deployed to.
+In addition set `--providers.docker.exposedbydefault=false`, so not all services are exposed.
 
 Next set the web and secureweb endpoints
 ```
@@ -83,6 +84,9 @@ See the full example in `nextcloud-compose.yaml`.
 
 ## Deploy the stacks
 Now deploy the compose files with `docker stack deploy ...` or some Swarm UI like https://www.portainer.io/
+
+## Docker network
+The example creates a the proxy network called 'traefik_traefikfront' as part of `traefik-compose.yaml`. This means Traefik must be deployed before Nextcloud (or other services). Depending on the overall setup the proxy network should be created separately (`docker network create`).  
 
 # Contribution
 Feel free to improve/correct the compose files or text here.
