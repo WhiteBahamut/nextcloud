@@ -6,7 +6,7 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker.swarmmode=true"
-      - "--providers.docker.network=traefik_front"
+      - "--providers.docker.network=traefikfront"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
